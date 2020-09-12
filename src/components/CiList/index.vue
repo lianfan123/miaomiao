@@ -1,21 +1,22 @@
 <template>
     <div class="cinema_body">
-        <ul>
-            <li v-for="item in ciList" :key="item.cinemaId">
-                <div>
-                    <span>{{item.name}}</span>
-                    <span class="q"><span class="price">{{item.lowPrice/100}}</span> 元起</span>
-                </div>
-                <div class="address">
-                    <span>{{item.address}}</span>
-                    <span>{{parseInt(item.Distance)+'km'}}</span>
-                </div>
-                <div class="card">
-                    <div>小吃</div>
-                    <div>折扣卡</div>
-                </div>
-            </li>
-        </ul>
+        <Loading v-if="isLoading" />
+            <ul>
+                <li v-for="item in ciList" :key="item.cinemaId">
+                    <div>
+                        <span>{{item.name}}</span>
+                        <span class="q"><span class="price">{{item.lowPrice/100}}</span> 元起</span>
+                    </div>
+                    <div class="address">
+                        <span>{{item.address}}</span>
+                        <span>{{parseInt(item.Distance)+'km'}}</span>
+                    </div>
+                    <div class="card">
+                        <div>小吃</div>
+                        <div>折扣卡</div>
+                    </div>
+                </li>
+            </ul>
     </div>
 </template>
 
@@ -24,12 +25,18 @@ export default {
     name : 'CiList',
     data(){
         return {
-            ciList : []
+            ciList : [],
+            isLoading : true,
+            prevCityId : -1
         }
     },
-    mounted(){
+    activated(){
+
+        var cityId = this.$store.state.city.id
+        if(this.prevCityId === cityId){ return } 
+        this.isLoading = true
         this.axios({
-            url : 'https://m.maizuo.com/gateway?cityId=110100&ticketFlag=1&k=3031146',
+            url : 'https://m.maizuo.com/gateway?cityId='+cityId+'&ticketFlag=1&k=3031146',
             headers : {
                 'X-Client-Info': '{"a":"3000","ch":"1002","v":"5.0.4","e":"1599245960126942053400577","bc":"110100"}',
                 'X-Host': 'mall.film-ticket.cinema.list'
@@ -38,7 +45,10 @@ export default {
                 var msg = res.data.msg
                 if(msg === 'ok'){
                 this.ciList = res.data.data.cinemas
-                console.log(res.data.data.cinemas)
+                this.prevCityId = cityId
+                this.$nextTick(()=>{
+                    this.isLoading = false
+                })
                 }
             })
     }

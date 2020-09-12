@@ -35,6 +35,7 @@ export default {
     },
     watch : {
         message(newVal){
+            var cityId = this.$store.state.city.id
             this.axios.get('/ajax/search?kw='+newVal+'&cityId=10&stype=-1').then((res)=>{
                 var movies = res.data.movies
                 if(movies){
